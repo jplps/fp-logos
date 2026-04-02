@@ -1,0 +1,67 @@
+#+TITLE: ADR 001 — The Denotational Perspective
+#+DATE: 2026-04-02
+#+STATUS: Accepted
+
+* Context
+
+Landin's "The Next 700 Programming Languages" (1966) reframes programming
+language design around denotation: every syntactic form should have a clear,
+compositional meaning independent of the machine that runs it. ISWIM is not
+a language to implement but a lens through which to evaluate language design.
+
+Λόγος already has an eval/apply core (source 02). The question is: does
+our evaluator design honour the denotational principle, or does it leak
+operational detail into the semantics?
+
+* Decision
+
+The Λόγος evaluator treats every expression as denoting a value in a
+well-defined domain. Specifically:
+
+1. *Environment as denotation of names.* A variable denotes whatever the
+   environment maps it to. The environment is a function from names to
+   values — our alist-of-frames implementation is an operational choice,
+   not a semantic one. Any substitution that preserves the mapping is valid.
+
+2. *Closures as denotation of λ.* A =lambda= expression denotes a function
+   value — a closure capturing the lexical environment. This follows Landin
+   directly: the meaning of a function is determined at its point of
+   definition, not its point of application.
+
+3. *Compositional evaluation.* The meaning of =(f x)= is determined entirely
+   by the meanings of =f= and =x=. No special form inspects the syntactic
+   structure of its arguments at application time (macros will be a
+   separate, pre-evaluation phase — see source 08).
+
+4. *Conditional as value-producing form.* =if= and =cond= denote values,
+   not control flow. There is no "statement" category. This aligns with
+   Landin's where-clauses and ISWIM's expression orientation.
+
+* Consequences
+
+- *No implicit mutation in the evaluator's core path.* =define= mutates the
+  environment (an operational necessity for REPL-style interaction), but the
+  evaluation of the right-hand side is pure. When we add =set!= later, it
+  will be clearly marked as an effect.
+
+- *Macro expansion must be a separate pass.* Hygienic macros (source 08)
+  transform syntax before evaluation. Mixing expansion with evaluation
+  would violate compositionality — the denotation of an expression would
+  depend on expansion state.
+
+- *The evaluator's dispatch (=cond= on expression type) is operational,
+  not semantic.* It is an implementation of the denotation function, not the
+  denotation itself. This distinction matters when we later add CPS
+  transformation (source 07): CPS is an alternative operational strategy
+  for the same denotational semantics.
+
+* Relation to SICP §4.1
+
+Abelson and Sussman's metacircular evaluator embodies this perspective
+without naming it. Their =eval= is a denotation function; their =apply=
+is its operational companion. Λόγος follows the same structure, and this
+ADR makes the implicit principle explicit.
+
+The key insight Landin adds beyond SICP: the off-side rule and syntactic
+sugar are /denotationally transparent/ — they change notation, not meaning.
+Our future macro system should preserve this property.

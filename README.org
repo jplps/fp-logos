@@ -1,0 +1,153 @@
+#+TITLE: Λόγος — A Growing Lisp
+#+AUTHOR: João Silva
+#+STARTUP: showall
+
+* Λόγος
+
+A Lisp interpreter that grows concept-by-concept as you read the FP canon.
+From Church's λ-calculus through McCarthy's eval/apply to Hickey's persistent vectors —
+each source adds a feature, each feature gets tests, each test proves the idea correct.
+
+Two modules: =logos-scheme= (Chez Scheme, foundations + abstractions)
+and =logos-clj= (Clojure, applied FP + data structures).
+
+* Core Fundamentals
+
+The curriculum distils five ideas that recur across every source:
+
+1. *λ as universal substrate.* Church showed that a single construct — the anonymous function — encodes numbers, booleans, pairs, and control flow. Every subsequent layer (closures, continuations, monads) is a variation on this theme.
+2. *Eval/apply duality.* McCarthy's insight: a language is defined by the interplay of an evaluator that dispatches on syntax and an applicator that dispatches on procedure type. The Λόγος evaluator makes this loop explicit, then extends it with tail calls, macros, and effects without breaking the core contract.
+3. *Denotation over mechanism.* Landin's principle: every syntactic form denotes a value. The evaluator is an operational realisation of a denotational semantics. CPS is an alternative operational strategy for the same denotations.
+4. *Composition through algebraic laws.* Backus's combinator algebra, the monad laws, functor composition, red-black invariants — correctness in FP is proved by showing that composition preserves structure. Property tests encode these laws.
+5. *Persistence through structural sharing.* Okasaki and Hickey demonstrate that immutable data structures match mutable ones in practical performance by sharing unchanged substructure. The persistent vector trie is the canonical example.
+
+* Study Trail
+
+Each row is one source. Read the paper, implement the feature, write the tests, reflect.
+
+** Phase 1 — The Evaluator
+
+| # | Source                                         | Concept                                     | Module           | Tests |
+|---+------------------------------------------------+---------------------------------------------+------------------+-------|
+| 1 | Church, "Unsolvable Problem" (1936)            | λ-calculus, Church numerals, booleans       | =lambda.ss=      |    24 |
+| 2 | McCarthy, "Recursive Functions" (1960)         | eval/apply, S-expressions, environments     | =core.ss=        |    28 |
+| 3 | Landin, "Next 700 Languages" (1966)            | Denotational perspective                    | ADR (docs only)  |     — |
+| 4 | Backus, "Can Programming Be Liberated?" (1978) | Point-free combinators, algebra of programs | =combinators.ss= |    20 |
+
+Milestone: interpreter evaluates recursive functions, Church arithmetic passes property sweep (0–20), combinator algebraic laws hold. *72 tests.*
+
+** Phase 2 — Abstraction Power
+
+|  # | Source                                         | Concept                                  | Module                 | Tests |
+|----+------------------------------------------------+------------------------------------------+------------------------+-------|
+|  5 | Sussman & Steele, "Lambda: Ultimate" (1976–77) | Lexical closures, tail-call elimination  | =core.ss= (trampoline) |    12 |
+|  6 | Abelson & Sussman, /SICP/                      | Streams, memoised lazy lists             | =lazy.ss=              |    14 |
+|  7 | Steele, "Lambda: Ultimate GOTO" (1977)         | CPS transform, continuations             | =cps.ss=               |    16 |
+|  8 | Kohlbecker et al., "Hygienic Macros" (1986)    | Hygienic macro expansion, =syntax-rules= | =macros.ss=            |    11 |
+|  9 | Henderson, /Functional Programming/ (1980)     | Lazy evaluation, graph reduction         | (covered by =lazy.ss=) |     — |
+| 10 | Wadler, "Monads for FP" (1995)                 | Monad protocol: maybe, state, list       | =monads.ss=            |    27 |
+
+Milestone: closures + tail calls at 1M depth, CPS round-trips, hygienic =or=-capture test passes, Sieve of Eratosthenes via lazy streams, three monad instances with law suites. *80 tests.*
+
+** Phase 3 — Applied FP (Clojure)
+
+|  # | Source                                              | Concept                                        | Module                               | Tests |
+|----+-----------------------------------------------------+------------------------------------------------+--------------------------------------+-------|
+| 11 | Hughes, "Why FP Matters" (1989)                     | HOFs, lazy modularity, Newton-Raphson          | =combinator.clj=                     |    22 |
+| 12 | Wadler, "Theorems for Free!" (1989)                 | Parametricity, map fusion                      | (map fusion law in combinator tests) |     — |
+| 13 | Okasaki, /Purely Functional Data Structures/ (1998) | Banker's queue, leftist heap, red-black tree   | =persistent.clj=                     |    31 |
+| 14 | Peyton Jones, "Awkward Squad" (2001)                | IO, managed refs, STM                          | ADR (pending)                        |     — |
+| 15 | Swierstra, "Data Types à la Carte" (2008)           | Composable DSL, expression problem             | =dsl.clj=                            |    14 |
+| 16 | Kiselyov et al., "Extensible Effects" (2013)        | Effect handlers, delimited continuations       | =effects.ss= (Scheme)                |    16 |
+| 17 | Hickey, "History of Clojure" (2020)                 | 32-way persistent vector, bit-partitioned trie | =pvector.clj=                        |    14 |
+
+Milestone: persistent data structures with property-based invariant suites (1,150+ generated cases), composable DSL, extensible effects with handler ordering, persistent vector trie. *97 tests (81 assertions).*
+
+** Totals
+
+| Suite              | Example tests   | Property test runs |
+|--------------------+-----------------+--------------------|
+| Scheme (8 suites)  | 168             | ~440               |
+| Clojure (4 suites) | 37 (81 asserts) | ~1,150             |
+| *Total*            | *205*           | *~1,590*           |
+
+* Structure
+
+#+begin_example
+logos/
+├── scheme/
+│   ├── Makefile
+│   ├── src/
+│   │   ├── core.ss            eval/apply + trampoline TCE + and/or
+│   │   ├── lambda.ss           Church numerals, booleans, pairs
+│   │   ├── combinators.ss      Backus FP combinators
+│   │   ├── cps.ss              CPS transformer (primitives + user fns)
+│   │   ├── macros.ss           hygienic macro expander (syntax-rules)
+│   │   ├── lazy.ss             memoised lazy streams
+│   │   ├── monads.ss           monad protocol + maybe/state/list
+│   │   └── effects.ss          extensible effects (reader/state/exception)
+│   └── tests/                  mirrors src/, one file per module
+├── clj/
+│   ├── deps.edn
+│   ├── src/logos/
+│   │   ├── combinator.clj      Hughes combinators, Newton-Raphson, alpha-beta
+│   │   ├── persistent.clj      banker's queue, leftist heap, red-black tree
+│   │   ├── dsl.clj             composable DSL (protocols + records)
+│   │   └── pvector.clj         32-way persistent vector trie
+│   └── test/logos/             property-based + example tests
+├── docs/
+│   ├── reflections/            per-source org-mode reflections
+│   └── adr/                    architectural decision records
+│       └── 001-denotational-perspective.org
+├── fp-study-spec.md            full curriculum specification
+└── README.org
+#+end_example
+
+* Code Standards
+
+- *No comments.* Docstrings only — every public function documents what, parameters, returns, complexity.
+- *80 char lines.* 15-line max function bodies. 2 levels max =let= nesting.
+- *Property tests* for every algebraic structure (monad laws, heap ordering, red-black balance, combinator laws, queue FIFO, vector persistence).
+- *One commit per source/concept:* =07: CPS transform — add cps.ss with transformer and round-trip tests=.
+- *Pure functions by default.* Effectful functions suffixed with =!=, documented, pushed to boundaries.
+
+* Testing
+
+Three layers, applied across both modules:
+
+1. *Example tests* — golden inputs/outputs, minimum 5 per source.
+2. *Property tests* — algebraic laws and invariants. Scheme: custom generators. Clojure: =test.check= (100–200 runs per property).
+3. *Self-hosting test* — end of Phase 2, the Scheme interpreter evaluates its own =eval=.
+
+Running tests:
+
+#+begin_src shell
+cd scheme && make test       # all Scheme suites
+cd clj && clj -M:test        # all Clojure suites
+#+end_src
+
+* Parallel Tracks
+
+Run alongside the main tiers, not sequentially.
+
+- *Category Theory:* Awodey ch. 1–5, Milewski paired with implementations.
+- *Formal Verification:* Pierce /Software Foundations/ vol. 1 (Coq, first 6 chapters).
+- *History:* Turing 1936, Dijkstra EWDs (340, 447, 1036), Gabriel "Worse Is Better".
+
+* Tooling
+
+| Tool    | Choice                                       |
+|---------+----------------------------------------------|
+| Scheme  | Chez Scheme 10.x (R6RS, =make test= runner)  |
+| Clojure | 1.12 + deps.edn + =test.check= + test-runner |
+| Notes   | Org-mode, one file per source, interlinked   |
+| Papers  | Local archive, Zotero or plain filesystem    |
+
+* Completion Criteria
+
+Not "finished reading" but demonstrated ability:
+
+1. Metacircular Lisp evaluator from scratch (sources 1–2, 6).
+2. Non-trivial pure FP program — no mutation except at boundaries (sources 4, 11, 13).
+3. Explain monads, continuations, and effect systems precisely — no analogies (sources 7, 10, 15, 16).
+4. ~3000-word essay: Church → McCarthy → Hickey, why the Lisp tradition matters now (entire curriculum).

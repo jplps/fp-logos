@@ -1,0 +1,19 @@
+# Scheme
+*.so
+*.boot
+*.wpo
+
+# Clojure
+/clj/target/
+/clj/.cpcache/
+/clj/.nrepl-port
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*~
+\#*\#
+.#*
