@@ -21,45 +21,45 @@ The curriculum distils five ideas that recur across every source:
 4. *Composition through algebraic laws.* Backus's combinator algebra, the monad laws, functor composition, red-black invariants — correctness in FP is proved by showing that composition preserves structure. Property tests encode these laws.
 5. *Persistence through structural sharing.* Okasaki and Hickey demonstrate that immutable data structures match mutable ones in practical performance by sharing unchanged substructure. The persistent vector trie is the canonical example.
 
-* Study Trail
+* Study Sequence
 
-Each row is one source. Read the paper, implement the feature, write the tests, reflect.
+For each source: read the paper → study the implementation → run the tests → write the reflection.
 
 ** Phase 1 — The Evaluator
 
-| # | Source                                         | Concept                                     | Module           | Tests |
-|---+------------------------------------------------+---------------------------------------------+------------------+-------|
-| 1 | Church, "Unsolvable Problem" (1936)            | λ-calculus, Church numerals, booleans       | =lambda.ss=      |    24 |
-| 2 | McCarthy, "Recursive Functions" (1960)         | eval/apply, S-expressions, environments     | =core.ss=        |    28 |
-| 3 | Landin, "Next 700 Languages" (1966)            | Denotational perspective                    | ADR (docs only)  |     — |
-| 4 | Backus, "Can Programming Be Liberated?" (1978) | Point-free combinators, algebra of programs | =combinators.ss= |    20 |
+| # | Concept                      | Implement                                   | Test                               |
+|---+------------------------------+---------------------------------------------+------------------------------------|
+| 1 | λ-calculus, Church encodings | =scheme/src/lambda.ss=                      | =scheme/tests/lambda-test.ss=      |
+| 2 | eval/apply, S-expressions    | =scheme/src/core.ss=                        | =scheme/tests/core-test.ss=        |
+| 3 | Denotation, ISWIM            | =docs/adr/001-denotational-perspective.org= | —                                  |
+| 4 | Point-free combinators       | =scheme/src/combinators.ss=                 | =scheme/tests/combinators-test.ss= |
 
 Milestone: interpreter evaluates recursive functions, Church arithmetic passes property sweep (0–20), combinator algebraic laws hold. *72 tests.*
 
 ** Phase 2 — Abstraction Power
 
-|  # | Source                                         | Concept                                  | Module                 | Tests |
-|----+------------------------------------------------+------------------------------------------+------------------------+-------|
-|  5 | Sussman & Steele, "Lambda: Ultimate" (1976–77) | Lexical closures, tail-call elimination  | =core.ss= (trampoline) |    12 |
-|  6 | Abelson & Sussman, /SICP/                      | Streams, memoised lazy lists             | =lazy.ss=              |    14 |
-|  7 | Steele, "Lambda: Ultimate GOTO" (1977)         | CPS transform, continuations             | =cps.ss=               |    16 |
-|  8 | Kohlbecker et al., "Hygienic Macros" (1986)    | Hygienic macro expansion, =syntax-rules= | =macros.ss=            |    11 |
-|  9 | Henderson, /Functional Programming/ (1980)     | Lazy evaluation, graph reduction         | (covered by =lazy.ss=) |     — |
-| 10 | Wadler, "Monads for FP" (1995)                 | Monad protocol: maybe, state, list       | =monads.ss=            |    27 |
+|  # | Concept                           | Implement              | Test                          |
+|----+-----------------------------------+------------------------+-------------------------------|
+|  5 | Lexical closures, tail calls      | =scheme/src/core.ss=   | =scheme/tests/core-test.ss=   |
+|  6 | Streams, lazy lists               | =scheme/src/lazy.ss=   | =scheme/tests/lazy-test.ss=   |
+|  7 | CPS transform, continuations      | =scheme/src/cps.ss=    | =scheme/tests/cps-test.ss=    |
+|  8 | Hygienic macro expansion          | =scheme/src/macros.ss= | =scheme/tests/macros-test.ss= |
+|  9 | Lazy eval, graph reduction        | (revisit =lazy.ss=)    | —                             |
+| 10 | Monad protocol (maybe/state/list) | =scheme/src/monads.ss= | =scheme/tests/monads-test.ss= |
 
 Milestone: closures + tail calls at 1M depth, CPS round-trips, hygienic =or=-capture test passes, Sieve of Eratosthenes via lazy streams, three monad instances with law suites. *80 tests.*
 
 ** Phase 3 — Applied FP (Clojure)
 
-|  # | Source                                              | Concept                                        | Module                               | Tests |
-|----+-----------------------------------------------------+------------------------------------------------+--------------------------------------+-------|
-| 11 | Hughes, "Why FP Matters" (1989)                     | HOFs, lazy modularity, Newton-Raphson          | =combinator.clj=                     |    22 |
-| 12 | Wadler, "Theorems for Free!" (1989)                 | Parametricity, map fusion                      | (map fusion law in combinator tests) |     — |
-| 13 | Okasaki, /Purely Functional Data Structures/ (1998) | Banker's queue, leftist heap, red-black tree   | =persistent.clj=                     |    31 |
-| 14 | Peyton Jones, "Awkward Squad" (2001)                | IO, managed refs, STM                          | ADR (pending)                        |     — |
-| 15 | Swierstra, "Data Types à la Carte" (2008)           | Composable DSL, expression problem             | =dsl.clj=                            |    14 |
-| 16 | Kiselyov et al., "Extensible Effects" (2013)        | Effect handlers, delimited continuations       | =effects.ss= (Scheme)                |    16 |
-| 17 | Hickey, "History of Clojure" (2020)                 | 32-way persistent vector, bit-partitioned trie | =pvector.clj=                        |    14 |
+|  # | Concept                                 | Implement                      | Test                                 |
+|----+-----------------------------------------+--------------------------------+--------------------------------------|
+| 11 | HOFs, lazy modularity, Newton-Raphson   | =clj/src/logos/combinator.clj= | =clj/test/logos/combinator_test.clj= |
+| 12 | Parametricity, map fusion               | (in combinator tests)          | —                                    |
+| 13 | Queue, heap, red-black tree             | =clj/src/logos/persistent.clj= | =clj/test/logos/persistent_test.clj= |
+| 14 | IO, managed refs, STM                   | ADR (pending)                  | —                                    |
+| 15 | Composable DSL, expression problem      | =clj/src/logos/dsl.clj=        | =clj/test/logos/dsl_test.clj=        |
+| 16 | Extensible effect handlers              | =scheme/src/effects.ss=        | =scheme/tests/effects-test.ss=       |
+| 17 | Persistent vector, bit-partitioned trie | =clj/src/logos/pvector.clj=    | =clj/test/logos/pvector_test.clj=    |
 
 Milestone: persistent data structures with property-based invariant suites (1,150+ generated cases), composable DSL, extensible effects with handler ordering, persistent vector trie. *97 tests (81 assertions).*
 
@@ -70,6 +70,30 @@ Milestone: persistent data structures with property-based invariant suites (1,15
 | Scheme (8 suites)  | 168             | ~440               |
 | Clojure (4 suites) | 37 (81 asserts) | ~1,150             |
 | *Total*            | *205*           | *~1,590*           |
+
+* Reading List
+
+|  # | Paper                                                               |    Year | Reflect                  |
+|----+---------------------------------------------------------------------+---------+--------------------------|
+|  1 | Church, "An Unsolvable Problem of Elementary Number Theory"         |    1936 | =01-church.org=          |
+|  2 | McCarthy, "Recursive Functions of Symbolic Expressions"             |    1960 | =02-mccarthy.org=        |
+|  3 | Landin, "The Next 700 Programming Languages"                        |    1966 | =03-landin.org=          |
+|  4 | Backus, "Can Programming Be Liberated from the von Neumann Style?"  |    1978 | =04-backus.org=          |
+|  5 | Sussman & Steele, "Lambda: The Ultimate Imperative/Declarative"     | 1976–77 | =05-sussman-steele.org=  |
+|  6 | Abelson & Sussman, /SICP/                                           |    1985 | =06-sicp.org=            |
+|  7 | Steele, "Lambda: The Ultimate GOTO"                                 |    1977 | =07-steele.org=          |
+|  8 | Kohlbecker et al., "Hygienic Macro Expansion"                       |    1986 | =08-kohlbecker.org=      |
+|  9 | Henderson, /Functional Programming: Application and Implementation/ |    1980 | =09-henderson.org=       |
+| 10 | Wadler, "Monads for Functional Programming"                         |    1995 | =10-wadler.org=          |
+| 11 | Hughes, "Why Functional Programming Matters"                        |    1989 | =11-hughes.org=          |
+| 12 | Wadler, "Theorems for Free!"                                        |    1989 | =12-wadler-theorems.org= |
+| 13 | Okasaki, /Purely Functional Data Structures/                        |    1998 | =13-okasaki.org=         |
+| 14 | Peyton Jones, "Tackling the Awkward Squad"                          |    2001 | =14-peyton-jones.org=    |
+| 15 | Swierstra, "Data Types à la Carte"                                  |    2008 | =15-swierstra.org=       |
+| 16 | Kiselyov et al., "Extensible Effects"                               |    2013 | =16-kiselyov.org=        |
+| 17 | Hickey, "A History of Clojure" (HOPL IV)                            |    2020 | =17-hickey.org=          |
+
+All reflections live in =docs/reflections/=.
 
 * Structure
 
@@ -96,7 +120,7 @@ logos/
 │   │   └── pvector.clj         32-way persistent vector trie
 │   └── test/logos/             property-based + example tests
 ├── docs/
-│   ├── reflections/            per-source org-mode reflections
+│   ├── reflections/            one org file per source (NN-author.org)
 │   └── adr/                    architectural decision records
 │       └── 001-denotational-perspective.org
 ├── fp-study-spec.md            full curriculum specification
